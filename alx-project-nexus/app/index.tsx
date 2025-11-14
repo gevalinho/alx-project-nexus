@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Text, View } from "react-native";
 import "../global.css";
 
@@ -17,4 +18,10 @@ export default function Index() {
       <Text className="text-white text-xl font-bold">Profile Screen</Text>
     </View>
   );
+=======
+import { Redirect } from "expo-router";
+
+export default function Index() {
+  return <Redirect href="/(tabs)" />;
+>>>>>>> 1744576869059bf3b573041a5886bb27235d6bea
 }

@@ -1,6 +1,6 @@
 
-import { Feather, Ionicons } from "@expo/vector-icons";
 // import { useEffect } from "react";
+import HeaderSearch from "@/components/home/HeaderSearch";
 import { useEffect, useState } from "react";
 import {
   Dimensions,
@@ -8,13 +8,15 @@ import {
   Image,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import ProductCard from "../components/ProductCard";
 import { useAppDispatch, useAppSelector } from "../lib/store/hooks";
 import { fetchProducts } from "../lib/store/productSlice";
+
+
 
 
 
@@ -42,58 +44,12 @@ const [currentBanner, setCurrentBanner] = useState(0);
   }, [dispatch]);
 
   return (
-    <ScrollView className="flex-1 bg-white px-4 pt-12">
-
-      {/* 🔍 Search Bar */}
-      <View className="flex-row items-center mb-5">
-        <View className="flex-row items-center bg-gray-100 px-4 py-3 rounded-2xl flex-1">
-          <Ionicons name="search" size={20} color="#FF7200" />
-          <TextInput
-            placeholder="Search Outfit"
-            placeholderTextColor="#888"
-            className="ml-3 flex-1 text-black text-base"
-          />
-        </View>
-
-        {/* Icons */}
-        <TouchableOpacity className="ml-3 bg-gray-100 p-3 rounded-xl">
-          <Feather name="heart" size={22} color="#0D1A2E" />
-        </TouchableOpacity>
-
-        <TouchableOpacity className="ml-2 bg-gray-100 p-3 rounded-xl">
-          <Feather name="bell" size={22} color="#0D1A2E" />
-        </TouchableOpacity>
-      </View>
-
-      {/* 🛍 Banner */}
-      {/* <View className="w-full h-44 rounded-2xl mb-6 overflow-hidden bg-gray-200">
-        <Image
-          // source={{
-          //   uri: "https://i.pinimg.com/736x/3d/30/42/3d3042aeb78f99c2efe5dfa3b3f9b9d2.jpg",
-          // }}
-          source={require("../assets/images/banner_1.png")}
-          className="w-full h-full"
-        />
-
-        <View className="absolute left-4 top-4">
-          <Text className="text-2xl font-bold text-white">New Year Sale</Text>
-          <Text className="text-xl font-bold text-white">40% off</Text>
-
-          {/* Countdown */}
-          {/* <View className="flex-row mt-3">
-            {["02", "09", "24"].map((num, index) => (
-              <View
-                key={index}
-                className="bg-white px-2 py-1 rounded-lg mx-1"
-              >
-                <Text className="font-semibold text-gray-700">{num}</Text>
-              </View>
-            ))}
-          </View> */}
-        {/* </View> */}
-      {/* </View> */} 
-
-
+<>
+    <SafeAreaView className="flex-1 bg-white">
+     
+     <HeaderSearch/>
+    
+  <ScrollView className="flex-1 bg-white px-4 pt-5">
      
 {/* 📌 Sliding Banner */}
 <View
@@ -266,5 +222,9 @@ const [currentBanner, setCurrentBanner] = useState(0);
         scrollEnabled={false}
       />
     </ScrollView>
+    
+    </SafeAreaView>
+    </>
+    
   );
 }

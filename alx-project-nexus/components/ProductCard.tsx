@@ -89,7 +89,8 @@ export default function ProductCard({ item }: { item: Product }) {
   const openDetails = () => {
     router.push({
       pathname: "/(tabs)/product/[id]",
-      params: { id: item.id.toString() },
+      // params: { id: item.id.toString() },
+      params: { id: item.id },
     });
   };
 

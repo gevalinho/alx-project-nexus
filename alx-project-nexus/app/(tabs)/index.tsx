@@ -4,15 +4,16 @@ import CategorySection from "@/components/home/CategorySection";
 import HeaderSearch from "@/components/home/HeaderSearch";
 import { useEffect } from "react";
 import {
-    ScrollView,
-    Text,
-    View
+  ScrollView,
+  Text,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ProductGrid from "../../components/home/ProductGrid";
 import SlidingBanner from "../../components/home/SlidingBanner";
 import { useAppDispatch, useAppSelector } from "../../lib/store/hooks";
 import { fetchProducts } from "../../lib/store/productSlice";
+
 
 
 
@@ -46,7 +47,7 @@ export default function Home() {
         <Text className="text-orange-500 font-semibold">View all</Text>
       </View>
 
-      <ProductGrid items={items} limit={4} />
+      <ProductGrid items={items}  />
     </ScrollView>
     
     </SafeAreaView>

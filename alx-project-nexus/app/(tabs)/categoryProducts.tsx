@@ -1,60 +1,9 @@
-// import ProductCard from "@/components/ProductCard";
-// import { Ionicons } from "@expo/vector-icons";
-// import { router, useLocalSearchParams } from "expo-router";
-// import { FlatList, Text, TouchableOpacity, View } from "react-native";
-// import { useAppSelector } from "../../lib/store/hooks";
-
-
-// export default function CategoryProducts() {
-//   const { category, title } = useLocalSearchParams();
-//   const { items } = useAppSelector((state) => state.products);
-
-//   // FILTER PRODUCTS BASED ON CATEGORY ID
-//   const filtered = items.filter((p) => {
-//     if (category === "mens") return p.category === "men's clothing";
-//     if (category === "womens") return p.category === "women's clothing";
-//     if (category === "kids") return p.category === "kids"; // custom if needed
-//     if (category === "shoes") return p.category === "shoes";
-//     if (category === "bags") return p.category === "bags";
-//     return false;
-//   });
-
-//   return (
-//     <View className="flex-1 bg-white">
-
-//       {/* HEADER */}
-//       <View className="flex-row items-center px-4 py-4 border-b border-gray-200">
-//         <TouchableOpacity onPress={() => router.back()}>
-//           <Ionicons name="arrow-back" size={24} color="#0D1A2E" />
-//         </TouchableOpacity>
-
-//         <Text className="text-lg font-semibold text-[#0D1A2E] ml-4">
-//           {title}
-//         </Text>
-//       </View>
-
-//       {/* RESULTS */}
-//       <FlatList
-//         data={filtered}
-//         numColumns={2}
-//         contentContainerStyle={{ padding: 16 }}
-//         columnWrapperStyle={{ justifyContent: "space-between" }}
-//         renderItem={({ item }) => <ProductCard item={item} />}
-//       />
-//     </View>
-//   );
-// }
-
-
 import ProductCard from "@/components/ProductCard";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";
 import { useAppSelector } from "../../lib/store/hooks";
 
-/**
- * Map UI categories → API category names
- */
 const CATEGORY_MAP: Record<string, string> = {
   "Man Style": "men's clothing",
   "Woman Style": "women's clothing",
@@ -64,42 +13,47 @@ const CATEGORY_MAP: Record<string, string> = {
 };
 
 export default function CategoryProducts() {
-  const { category } = useLocalSearchParams(); // e.g. "Man Style"
+  const params = useLocalSearchParams();
+  const selectedCategory = String(params.category ?? "");
+
   const { items } = useAppSelector((state) => state.products);
 
-  // Convert UI category to matching API category
-  const apiCategory = CATEGORY_MAP[String(category)] || null;
+  const apiCategory =
+    CATEGORY_MAP[selectedCategory] ||
+    ""; // fallback to empty string to avoid undefined
 
-  // Filter products (safe fallback)
-  const filtered = apiCategory
-    ? items.filter((p) => p.category === apiCategory)
-    : [];
+  const filteredProducts = items.filter(
+    (p) =>
+      p.category?.trim().toLowerCase() === apiCategory.trim().toLowerCase()
+  );
 
   return (
     <View className="flex-1 bg-white">
-      {/* TOP HEADER */}
+      {/* HEADER */}
       <View className="flex-row items-center px-4 py-4 border-b border-gray-200">
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={26} color="#0D1A2E" />
         </TouchableOpacity>
 
         <Text className="text-lg font-semibold text-[#0D1A2E] ml-4">
-          {category}
+          {selectedCategory}
         </Text>
       </View>
 
       {/* EMPTY STATE */}
-      {filtered.length === 0 && (
+      {filteredProducts.length === 0 && (
         <View className="px-4 mt-6">
           <Text className="text-gray-500 text-base">
-            No products found for "{category}"
+            {/* No products found for "{selectedCategory}" */}
+            <Text>No products found for &quot;{selectedCategory}&quot;</Text>
+
           </Text>
         </View>
       )}
 
       {/* PRODUCT GRID */}
       <FlatList
-        data={filtered}
+        data={filteredProducts}
         numColumns={2}
         contentContainerStyle={{ padding: 16 }}
         columnWrapperStyle={{ justifyContent: "space-between" }}

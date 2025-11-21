@@ -6,7 +6,7 @@ export default function Index() {
   useEffect(() => {
     // Delay navigation until after first render
     setTimeout(() => {
-      router.replace("/(tabs)");
+      router.replace("/auth/splash");
     }, 0);
   }, []);
 

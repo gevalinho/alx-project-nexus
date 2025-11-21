@@ -26,14 +26,9 @@ export default function RootLayout() {
     <Provider store={store}>
       <Stack
         screenOptions={{
-          headerShown: false, // Hide headers globally
+          headerShown: false,
         }}
-      >
-        {/* Register screens here */}
-        {/* <Stack.Screen name="splash" /> */}
-        {/* <Stack.Screen name="signin" /> */}
-        <Stack.Screen name="signup" />
-      </Stack>
+      />
     </Provider>
   );
 }

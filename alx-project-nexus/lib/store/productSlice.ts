@@ -301,7 +301,12 @@
  *  - Full control over categories (shoes, bags, etc.)
  */
 
-import { PRODUCTS } from "@/lib/data/products";
+import {
+  fetchAllProductsApi,
+  fetchProductsByCategoryApi,
+  searchProductsApi,
+  sortProductsApi,
+} from "@/lib/api/products";
 import type { Product } from "@/lib/types/Product";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
@@ -320,67 +325,84 @@ const initialState: ProductState = {
   error: null,
 };
 
-/* -----------------------------------------------------------
-  THUNK 1 — Load ALL products (local JSON)
------------------------------------------------------------ */
-export const fetchProducts = createAsyncThunk(
-  "products/fetchAll",
-  async () => {
-    // simulate network delay for realism
-    await new Promise((res) => setTimeout(res, 300));
-    return PRODUCTS;
+const normalizeError = (error: unknown) => {
+  if (typeof error === "string") return error;
+  if (error && typeof error === "object" && "message" in error) {
+    return (error as { message?: string }).message ?? null;
   }
-);
-
-/* -----------------------------------------------------------
-  THUNK 2 — Filter by Category (local)
------------------------------------------------------------ */
-export const fetchProductsByCategory = createAsyncThunk(
-  "products/fetchByCategory",
-  async (category: string) => {
-    await new Promise((res) => setTimeout(res, 200));
-    // return PRODUCTS.filter((p) => p.category === category);
-    return PRODUCTS.filter(
-  (p) =>
-    p.category?.trim().toLowerCase() === category.trim().toLowerCase()
-);
+  if (error instanceof Error) {
+    return error.message;
   }
-);
+  return null;
+};
 
 /* -----------------------------------------------------------
-  THUNK 3 — Search (local)
+  THUNK 1 - Load ALL products (API + fallback)
 ----------------------------------------------------------- */
-export const searchProducts = createAsyncThunk(
-  "products/search",
-  async (query: string) => {
-    await new Promise((res) => setTimeout(res, 200));
-
-    if (!query.trim()) return PRODUCTS;
-
-    const q = query.toLowerCase();
-    return PRODUCTS.filter(
-      (p) =>
-        p.title.toLowerCase().includes(q) ||
-        p.category?.toLowerCase().includes(q)
-    );
+export const fetchProducts = createAsyncThunk<
+  Product[],
+  void,
+  { rejectValue: string }
+>("products/fetchAll", async (_, { rejectWithValue }) => {
+  try {
+    return await fetchAllProductsApi();
+  } catch (error) {
+    const message =
+      normalizeError(error) ?? "Unable to load products. Please try again.";
+    return rejectWithValue(message);
   }
-);
+});
 
 /* -----------------------------------------------------------
-  THUNK 4 — Sort (local)
+  THUNK 2 - Filter by Category
 ----------------------------------------------------------- */
-export const sortProducts = createAsyncThunk(
-  "products/sort",
-  async (order: "asc" | "desc") => {
-    await new Promise((res) => setTimeout(res, 200));
-
-    const sorted = [...PRODUCTS].sort((a, b) =>
-      order === "asc" ? a.price - b.price : b.price - a.price
-    );
-
-    return sorted;
+export const fetchProductsByCategory = createAsyncThunk<
+  Product[],
+  string,
+  { rejectValue: string }
+>("products/fetchByCategory", async (category, { rejectWithValue }) => {
+  try {
+    return await fetchProductsByCategoryApi(category);
+  } catch (error) {
+    const message =
+      normalizeError(error) ?? "Unable to filter products right now.";
+    return rejectWithValue(message);
   }
-);
+});
+
+/* -----------------------------------------------------------
+  THUNK 3 - Search
+----------------------------------------------------------- */
+export const searchProducts = createAsyncThunk<
+  Product[],
+  string,
+  { rejectValue: string }
+>("products/search", async (query, { rejectWithValue }) => {
+  try {
+    return await searchProductsApi(query);
+  } catch (error) {
+    const message =
+      normalizeError(error) ?? "Unable to search products right now.";
+    return rejectWithValue(message);
+  }
+});
+
+/* -----------------------------------------------------------
+  THUNK 4 - Sort
+----------------------------------------------------------- */
+export const sortProducts = createAsyncThunk<
+  Product[],
+  "asc" | "desc",
+  { rejectValue: string }
+>("products/sort", async (order, { rejectWithValue }) => {
+  try {
+    return await sortProductsApi(order);
+  } catch (error) {
+    const message =
+      normalizeError(error) ?? "Unable to sort products right now.";
+    return rejectWithValue(message);
+  }
+});
 
 /* -----------------------------------------------------------
   SLICE
@@ -391,43 +413,67 @@ const productSlice = createSlice({
   reducers: {},
 
   extraReducers: (builder) => {
-    /* FETCH ALL */
-    builder.addCase(fetchProducts.pending, (state) => {
-      state.loading = true;
-      state.error = null;
-    });
-    builder.addCase(fetchProducts.fulfilled, (state, action) => {
-      state.loading = false;
-      state.items = action.payload;
-    });
-
-    /* CATEGORY */
-    builder.addCase(fetchProductsByCategory.pending, (state) => {
-      state.loading = true;
-      state.error = null;
-    });
-    builder.addCase(fetchProductsByCategory.fulfilled, (state, action) => {
-      state.loading = false;
-      state.items = action.payload;
-    });
-
-    /* SEARCH */
-    builder.addCase(searchProducts.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(searchProducts.fulfilled, (state, action) => {
-      state.loading = false;
-      state.items = action.payload;
-    });
-
-    /* SORTING */
-    builder.addCase(sortProducts.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(sortProducts.fulfilled, (state, action) => {
-      state.loading = false;
-      state.items = action.payload;
-    });
+    builder
+      .addCase(fetchProducts.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchProducts.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchProducts.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          action.payload ?? action.error.message ?? "Failed to load products.";
+      })
+      .addCase(fetchProductsByCategory.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchProductsByCategory.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchProductsByCategory.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          action.payload ??
+          action.error.message ??
+          "Failed to filter products.";
+      })
+      .addCase(searchProducts.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(searchProducts.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload;
+        state.error = null;
+      })
+      .addCase(searchProducts.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          action.payload ??
+          action.error.message ??
+          "Failed to search for products.";
+      })
+      .addCase(sortProducts.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(sortProducts.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload;
+        state.error = null;
+      })
+      .addCase(sortProducts.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          action.payload ??
+          action.error.message ??
+          "Failed to sort products.";
+      });
   },
 });
 

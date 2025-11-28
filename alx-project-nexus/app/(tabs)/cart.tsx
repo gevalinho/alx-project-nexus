@@ -9,7 +9,7 @@ export default function CartScreen() {
 
   const totalItems = items.reduce((acc, x) => acc + x.quantity, 0);
   const totalPrice = items
-    .reduce((acc, x) => acc + x.price * x.quantity, 0)
+    .reduce((acc, x) => acc + Number(x.price || 0) * x.quantity, 0)
     .toFixed(2);
 
   const discount = 7; // Static for now
@@ -32,7 +32,6 @@ export default function CartScreen() {
         contentContainerStyle={{ padding: 16 }}
         renderItem={({ item }) => (
           <View className="flex-row items-center bg-white mb-4 p-3 rounded-xl shadow-sm border border-gray-100">
-            
             {/* CHECKED ICON */}
             <Ionicons
               name="checkmark-circle"
@@ -50,7 +49,7 @@ export default function CartScreen() {
             {/* ITEM DETAILS */}
             <View className="flex-1">
               <Text className="text-base font-medium text-[#0D1A2E]">
-                {item.title}
+                {item.name ?? item.title}
               </Text>
 
               <Text className="text-xs text-gray-500">
@@ -58,7 +57,7 @@ export default function CartScreen() {
               </Text>
 
               <Text className="text-[15px] font-semibold text-[#0D1A2E] mt-1">
-                ${item.price.toFixed(2)}
+                ${Number(item.price || 0).toFixed(2)}
               </Text>
             </View>
 

@@ -1,23 +1,3 @@
-// import AsyncStorage from "@react-native-async-storage/async-storage";
-
-// export const saveAuth = async (token: string, user: any) => {
-//   await AsyncStorage.setItem("token", token);
-//   await AsyncStorage.setItem("user", JSON.stringify(user));
-// };
-
-// export const loadAuth = async () => {
-//   const token = await AsyncStorage.getItem("token");
-//   const userString = await AsyncStorage.getItem("user");
-//   return token && userString ? { token, user: JSON.parse(userString) } : null;
-// };
-
-// export const clearAuth = async () => {
-//   await AsyncStorage.removeItem("token");
-//   await AsyncStorage.removeItem("user");
-// };
-
-
-
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ACCESS_TOKEN_KEY = "accessToken";
@@ -26,14 +6,24 @@ const USER_KEY = "user";
 
 export const saveAuth = async (
   accessToken: string,
-  refreshToken: string,
-  user: any
+  refreshToken?: string | null,
+  user?: any
 ) => {
-  await AsyncStorage.multiSet([
-    [ACCESS_TOKEN_KEY, accessToken],
-    [REFRESH_TOKEN_KEY, refreshToken],
-    [USER_KEY, JSON.stringify(user)],
-  ]);
+  const entries: [string, string][] = [[ACCESS_TOKEN_KEY, accessToken]];
+
+  if (refreshToken) {
+    entries.push([REFRESH_TOKEN_KEY, refreshToken]);
+  } else {
+    await AsyncStorage.removeItem(REFRESH_TOKEN_KEY);
+  }
+
+  if (user !== undefined && user !== null) {
+    entries.push([USER_KEY, JSON.stringify(user)]);
+  } else {
+    await AsyncStorage.removeItem(USER_KEY);
+  }
+
+  await AsyncStorage.multiSet(entries);
 };
 
 export const clearAuth = async () => {

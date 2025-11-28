@@ -2,22 +2,17 @@
 // import { useEffect } from "react";
 import CategorySection from "@/components/home/CategorySection";
 import HeaderSearch from "@/components/home/HeaderSearch";
-import { useEffect } from "react";
-import {
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import ProductGrid from "../../components/home/ProductGrid";
-import SlidingBanner from "../../components/home/SlidingBanner";
+import ProductGrid from "@/components/home/ProductGrid";
+import ProductSkeletonGrid from "@/components/home/ProductSkeletonGrid";
+import SlidingBanner from "@/components/home/SlidingBanner";
 import { logout } from "@/lib/store/authSlice";
 import { clearAuth } from "@/lib/utils/storage";
+import { fetchProducts } from "@/lib/store/productSlice";
 import { router } from "expo-router";
-
+import { useEffect } from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppDispatch, useAppSelector } from "../../lib/store/hooks";
-import { fetchProducts } from "../../lib/store/productSlice";
 
 
 
@@ -25,7 +20,7 @@ import { fetchProducts } from "../../lib/store/productSlice";
 
 export default function Home() {
   const dispatch = useAppDispatch();
-  const { items } = useAppSelector((state) => state.products);
+  const { items, loading } = useAppSelector((state) => state.products);
   const authLoading = useAppSelector((state) => state.auth.loading);
   
 
@@ -71,7 +66,11 @@ export default function Home() {
         <Text className="text-orange-500 font-semibold">View all</Text>
       </View>
 
-      <ProductGrid items={items}  />
+      {loading ? (
+        <ProductSkeletonGrid />
+      ) : (
+        <ProductGrid items={items} />
+      )}
     </ScrollView>
     
     </SafeAreaView>

@@ -14,6 +14,7 @@ import {
 import { loginUser } from "@/lib/api/auth";
 import { loginSuccess, setLoading } from "@/lib/store/authSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { fetchProducts } from "@/lib/store/productSlice";
 import { saveAuth } from "@/lib/utils/storage";
 
 export default function SignIn() {
@@ -48,6 +49,7 @@ export default function SignIn() {
         })
       );
       await saveAuth(res.access_token, res.refresh_token, res.user);
+      dispatch(fetchProducts());
 
       router.replace("/(tabs)/home");
     } catch (error: any) {

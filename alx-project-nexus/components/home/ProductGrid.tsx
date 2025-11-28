@@ -1,8 +1,9 @@
 import { FlatList, View } from "react-native";
 import ProductCard from "../ProductCard";
+import type { Product } from "@/lib/types/Product";
 
 interface ProductGridProps {
-  items: any[];
+  items: Product[];
   limit?: number; // optional limit (default: no limit)
 }
 

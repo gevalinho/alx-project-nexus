@@ -303,12 +303,15 @@
 
 import {
   fetchAllProductsApi,
+  createProductApi,
   fetchProductsByCategoryApi,
   searchProductsApi,
   sortProductsApi,
+  type CreateProductPayload,
 } from "@/lib/api/products";
 import type { Product } from "@/lib/types/Product";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import type { RootState } from ".";
 
 /* -----------------------------------------------------------
   STATE TYPES
@@ -317,12 +320,16 @@ interface ProductState {
   items: Product[];
   loading: boolean;
   error: string | null;
+  creating: boolean;
+  createError: string | null;
 }
 
 const initialState: ProductState = {
   items: [],
   loading: false,
   error: null,
+  creating: false,
+  createError: null,
 };
 
 const normalizeError = (error: unknown) => {
@@ -342,10 +349,11 @@ const normalizeError = (error: unknown) => {
 export const fetchProducts = createAsyncThunk<
   Product[],
   void,
-  { rejectValue: string }
->("products/fetchAll", async (_, { rejectWithValue }) => {
+  { rejectValue: string; state: RootState }
+>("products/fetchAll", async (_, { rejectWithValue, getState }) => {
+  const token = getState().auth.accessToken ?? undefined;
   try {
-    return await fetchAllProductsApi();
+    return await fetchAllProductsApi(token);
   } catch (error) {
     const message =
       normalizeError(error) ?? "Unable to load products. Please try again.";
@@ -359,10 +367,11 @@ export const fetchProducts = createAsyncThunk<
 export const fetchProductsByCategory = createAsyncThunk<
   Product[],
   string,
-  { rejectValue: string }
->("products/fetchByCategory", async (category, { rejectWithValue }) => {
+  { rejectValue: string; state: RootState }
+>("products/fetchByCategory", async (category, { rejectWithValue, getState }) => {
+  const token = getState().auth.accessToken ?? undefined;
   try {
-    return await fetchProductsByCategoryApi(category);
+    return await fetchProductsByCategoryApi(category, token);
   } catch (error) {
     const message =
       normalizeError(error) ?? "Unable to filter products right now.";
@@ -376,10 +385,11 @@ export const fetchProductsByCategory = createAsyncThunk<
 export const searchProducts = createAsyncThunk<
   Product[],
   string,
-  { rejectValue: string }
->("products/search", async (query, { rejectWithValue }) => {
+  { rejectValue: string; state: RootState }
+>("products/search", async (query, { rejectWithValue, getState }) => {
+  const token = getState().auth.accessToken ?? undefined;
   try {
-    return await searchProductsApi(query);
+    return await searchProductsApi(query, token);
   } catch (error) {
     const message =
       normalizeError(error) ?? "Unable to search products right now.";
@@ -393,13 +403,34 @@ export const searchProducts = createAsyncThunk<
 export const sortProducts = createAsyncThunk<
   Product[],
   "asc" | "desc",
-  { rejectValue: string }
->("products/sort", async (order, { rejectWithValue }) => {
+  { rejectValue: string; state: RootState }
+>("products/sort", async (order, { rejectWithValue, getState }) => {
+  const token = getState().auth.accessToken ?? undefined;
   try {
-    return await sortProductsApi(order);
+    return await sortProductsApi(order, token);
   } catch (error) {
     const message =
       normalizeError(error) ?? "Unable to sort products right now.";
+    return rejectWithValue(message);
+  }
+});
+
+export const createProduct = createAsyncThunk<
+  Product,
+  CreateProductPayload,
+  { rejectValue: string; state: RootState }
+>("products/create", async (payload, { rejectWithValue, getState }) => {
+  const token = getState().auth.accessToken ?? undefined;
+
+  if (!token) {
+    return rejectWithValue("Please sign in to create a product.");
+  }
+
+  try {
+    return await createProductApi(payload, token);
+  } catch (error) {
+    const message =
+      normalizeError(error) ?? "Unable to create product right now.";
     return rejectWithValue(message);
   }
 });
@@ -473,6 +504,22 @@ const productSlice = createSlice({
           action.payload ??
           action.error.message ??
           "Failed to sort products.";
+      })
+      .addCase(createProduct.pending, (state) => {
+        state.creating = true;
+        state.createError = null;
+      })
+      .addCase(createProduct.fulfilled, (state, action) => {
+        state.creating = false;
+        state.createError = null;
+        state.items = [action.payload, ...state.items];
+      })
+      .addCase(createProduct.rejected, (state, action) => {
+        state.creating = false;
+        state.createError =
+          action.payload ??
+          action.error.message ??
+          "Failed to create product.";
       });
   },
 });

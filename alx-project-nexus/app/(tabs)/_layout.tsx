@@ -34,7 +34,6 @@ export default function TabsLayout() {
       <Tabs.Screen name="categoryProducts" options={{ href: null }} />
       <Tabs.Screen name="search" options={{ href: null }} />
       <Tabs.Screen name="home" options={{ href: null }} />
-      <Tabs.Screen name="productDetails" options={{ href: null }} />
       <Tabs.Screen name="order-accepted" options={{ href: null }} />
       <Tabs.Screen name="order-failed" options={{ href: null }} />
       <Tabs.Screen name="checkout" options={{ href: null }} />

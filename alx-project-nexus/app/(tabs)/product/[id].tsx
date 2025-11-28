@@ -20,9 +20,7 @@ export default function ProductDetails() {
   const { items } = useAppSelector((state) => state.products);
   const { items: favs } = useAppSelector((state) => state.favorites);
 
-  const product = items.find((p) => p.id.toString() === id);
-
-  // LOCAL STATE: Size + Color
+  const product = items.find((p) => p.id.toString() === String(id));
   const [selectedSize, setSelectedSize] = useState("M");
   const [selectedColor, setSelectedColor] = useState("#1C1C3A");
 
@@ -33,6 +31,9 @@ export default function ProductDetails() {
       </View>
     );
   }
+
+  const displayTitle = product.name ?? product.title ?? "";
+  const displayPrice = Number(product.price) || 0;
 
   const isFav = favs.some((p) => p.id === product.id);
 
@@ -82,11 +83,11 @@ export default function ProductDetails() {
         {/* TITLE + PRICE */}
         <View className="flex-row justify-between items-center mb-3">
           <Text className="text-[20px] font-semibold text-[#0D1A2E] w-[70%]">
-            {product.title}
+            {displayTitle}
           </Text>
 
           <Text className="text-[22px] font-bold text-[#FF8A00]">
-            ${product.price}
+            ${displayPrice}
           </Text>
         </View>
 

@@ -130,10 +130,7 @@ export default function ProfileScreen() {
       }
     >
       {isLoading ? (
-        <View className="items-center py-10">
-          <ActivityIndicator size="large" color="#FF8A00" />
-          <Text className="text-gray-500 mt-3">Loading profile...</Text>
-        </View>
+        <ProfileSkeleton />
       ) : (
         <>
           {/* Header */}
@@ -170,6 +167,11 @@ export default function ProfileScreen() {
           {/* ACCOUNT SECTION */}
           <Text className="text-gray-400 mb-2">Account</Text>
           <View className="bg-white rounded-lg">
+            <MenuItem
+              label="Create Product"
+              icon="add-circle-outline"
+              onPress={() => router.push("/profile/create-product")}
+            />
             <MenuItem
               label="Edit Profile"
               icon="person-outline"
@@ -251,5 +253,50 @@ function MenuItem({ label, icon, onPress, danger }: MenuItemProps) {
 
       <Ionicons name="chevron-forward" size={20} color="#999" />
     </TouchableOpacity>
+  );
+}
+
+function ProfileSkeleton() {
+  return (
+    <View className="bg-white px-5 pt-6">
+      <View className="items-center mb-6">
+        <View className="w-20 h-20 rounded-full bg-gray-200 mb-3" />
+        <View className="w-32 h-4 bg-gray-200 rounded mb-2" />
+        <View className="w-40 h-4 bg-gray-200 rounded" />
+      </View>
+
+      <View className="h-10 bg-gray-200 rounded mb-3" />
+
+      <View className="bg-white rounded-lg mb-4">
+        {[1, 2, 3].map((key) => (
+          <View
+            key={key}
+            className="flex-row items-center justify-between py-4 border-b border-gray-100"
+          >
+            <View className="flex-row items-center">
+              <View className="w-5 h-5 bg-gray-200 rounded-full mr-3" />
+              <View className="w-32 h-4 bg-gray-200 rounded" />
+            </View>
+            <View className="w-5 h-5 bg-gray-200 rounded" />
+          </View>
+        ))}
+      </View>
+
+      <View className="h-4 bg-gray-200 rounded w-24 mb-3" />
+      <View className="bg-white rounded-lg">
+        {[4, 5, 6, 7].map((key) => (
+          <View
+            key={key}
+            className="flex-row items-center justify-between py-4 border-b border-gray-100"
+          >
+            <View className="flex-row items-center">
+              <View className="w-5 h-5 bg-gray-200 rounded-full mr-3" />
+              <View className="w-32 h-4 bg-gray-200 rounded" />
+            </View>
+            <View className="w-5 h-5 bg-gray-200 rounded" />
+          </View>
+        ))}
+      </View>
+    </View>
   );
 }

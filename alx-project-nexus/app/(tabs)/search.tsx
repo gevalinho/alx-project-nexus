@@ -1,16 +1,30 @@
 import ProductCard from "@/components/ProductCard";
 import { Feather, Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useLocalSearchParams } from "expo-router";
+import { useMemo, useState } from "react";
 import { FlatList, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppSelector } from "../../lib/store/hooks";
 
 export default function SearchScreen() {
   const { items } = useAppSelector((state) => state.products);
+  const params = useLocalSearchParams();
+  const initialQuery =
+    typeof params.q === "string" ? params.q : Array.isArray(params.q) ? params.q[0] : "";
 
-  const [query, setQuery] = useState("");
-  const filtered = items.filter((p) =>
-    p.title.toLowerCase().includes(query.toLowerCase())
+  const [query, setQuery] = useState(initialQuery);
+  const normalizedQuery = query.trim().toLowerCase();
+
+  const filtered = useMemo(
+    () =>
+      items.filter((p) => {
+        const title = (p.title ?? p.name ?? "").toLowerCase();
+        const category = (p.category ?? "").toLowerCase();
+        return (
+          title.includes(normalizedQuery) || category.includes(normalizedQuery)
+        );
+      }),
+    [items, normalizedQuery]
   );
 
   return (

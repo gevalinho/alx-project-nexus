@@ -85,6 +85,10 @@ export default function ProductCard({ item }: { item: Product }) {
   const { items: favorites } = useAppSelector((state) => state.favorites);
 
   const isFav = favorites.some((p) => p.id === item.id);
+  const displayTitle = item.name ?? item.title;
+  const displayPrice = Number.isFinite(item.price)
+    ? item.price
+    : Number(item.price ?? 0);
 
   const openDetails = () => {
     router.push({
@@ -123,12 +127,12 @@ export default function ProductCard({ item }: { item: Product }) {
 
       {/* Title */}
       <Text className="text-sm font-semibold text-black" numberOfLines={2}>
-        {item.title}
+        {displayTitle}
       </Text>
 
       {/* Price */}
       <Text className="text-base font-bold text-orange-500 my-2">
-        ${item.price}
+        ${displayPrice}
       </Text>
 
       {/* Rating */}

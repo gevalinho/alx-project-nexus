@@ -14,12 +14,42 @@ import { useAppDispatch, useAppSelector } from "../../lib/store/hooks";
 
 export default function CategoryProducts() {
   const params = useLocalSearchParams();
-  const selectedCategory = String(params.category ?? "").trim();
-  const selectedTitle =
-    String(params.title ?? "").trim() || selectedCategory || "Category";
+
+  const extractParam = (param: string | string[] | undefined) => {
+    const raw = Array.isArray(param) ? param[0] : param;
+    if (typeof raw !== "string") return "";
+    try {
+      return decodeURIComponent(raw);
+    } catch {
+      return raw;
+    }
+  };
+
+  const rawTitle = extractParam(params.title).trim();
+  const selectedCategory = extractParam(params.category).trim();
+  const selectedTitle = rawTitle || selectedCategory || "Category";
 
   const dispatch = useAppDispatch();
   const { items, loading } = useAppSelector((state) => state.products);
+
+  const makeSlug = (value: string) =>
+    value
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]/g, "");
+
+  const targetSlugs = useMemo(() => {
+    const values = [selectedCategory, rawTitle]
+      .map((val) => val.trim())
+      .filter(Boolean);
+
+    const slugs = values
+      .map((val) => makeSlug(val))
+      .filter((slug) => slug.length > 0);
+
+    return slugs;
+  }, [selectedCategory, rawTitle]);
 
   useEffect(() => {
     if (!items.length && !loading) {
@@ -28,12 +58,31 @@ export default function CategoryProducts() {
   }, [dispatch, items.length, loading]);
 
   const filteredProducts = useMemo(() => {
-    if (!selectedCategory) return items;
+    if (!selectedCategory && !targetSlugs.length) return items;
     const normalized = selectedCategory.toLowerCase();
+
     return items.filter(
-      (p) => (p.category ?? "").trim().toLowerCase() === normalized
+      (p) => {
+        const categoryValue = (p.category ?? "").trim();
+        if (!categoryValue) return false;
+
+        const categoryMatch =
+          selectedCategory &&
+          categoryValue.toLowerCase() === normalized;
+
+        if (categoryMatch) {
+          return true;
+        }
+
+        if (!targetSlugs.length) {
+          return categoryMatch;
+        }
+
+        const categorySlug = makeSlug(categoryValue);
+        return targetSlugs.includes(categorySlug);
+      }
     );
-  }, [items, selectedCategory]);
+  }, [items, selectedCategory, targetSlugs]);
 
   return (
     <View className="flex-1 bg-white">

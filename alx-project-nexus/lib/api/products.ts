@@ -383,31 +383,26 @@ export const updateProductApi = async (
     throw new Error("No changes to update.");
   }
 
-  let body: BodyInit | undefined;
+  const formData = new FormData();
+  for (const [key, value] of definedEntries) {
+    const serialized =
+      typeof value === "number" ? value.toString() : String(value);
+    formData.append(key, serialized);
+  }
 
   if (hasFile) {
-    const formData = new FormData();
-    for (const [key, value] of definedEntries) {
-      formData.append(key, String(value));
-    }
-
     formData.append("product_image", {
       uri: normalizeUploadUri(product_image_file!.uri),
       name: product_image_file!.name,
       type: product_image_file!.type || "image/jpeg",
     } as any);
-
-    body = formData as any;
-  } else {
-    headers["Content-Type"] = "application/json";
-    body = JSON.stringify(Object.fromEntries(definedEntries));
   }
 
   const res = await withTimeout(
     fetch(`${BASE_URL}/product/product_list/${normalizedId}/`, {
       method: "PATCH",
       headers,
-      body,
+      body: formData as any,
     })
   );
 

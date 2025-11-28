@@ -82,7 +82,7 @@ export const categories = [
     title: "Man Style",
     color: "#DCE4D9",
     image: "https://images.pexels.com/photos/769874/pexels-photo-769874.jpeg",
-    category: "men",
+    category: "men's clothing",
   },
 
   {
@@ -90,7 +90,7 @@ export const categories = [
     title: "Woman Style",
     color: "#D9DDEA",
     image: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg",
-    category: "women",
+    category: "women's clothing",
   },
 
   {

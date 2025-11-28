@@ -150,7 +150,7 @@ export default function CategoriesPage() {
             onPress={() =>
               router.push({
                 pathname: "/(tabs)/categoryProducts",
-                params: { category: cat.title },
+                params: { category: cat.category ?? cat.title, title: cat.title },
               })
             }
             className="mb-4 rounded-2xl overflow-hidden"

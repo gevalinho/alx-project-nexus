@@ -1,36 +1,7 @@
 import { useRouter } from "expo-router";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
-/**
- * CategorySection Component
- * -------------------------------------------------------
- * - Clicking a category navigates to /category-products
- * - Passes { category: "Man Style" }
- */
-
-const CATEGORIES = [
-  {
-    id: 1,
-    title: "Man Style",
-    color: "#DCE4D9",
-    image:
-      "https://images.pexels.com/photos/769874/pexels-photo-769874.jpeg?auto=compress",
-  },
-  {
-    id: 2,
-    title: "Woman Style",
-    color: "#D9DDEA",
-    image:
-      "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress",
-  },
-  {
-    id: 3,
-    title: "Kids Style",
-    color: "#E9E8EB",
-    image:
-      "https://images.pexels.com/photos/3933213/pexels-photo-3933213.jpeg?auto=compress",
-  },
-];
+import { categories } from "@/lib/data/categories";
 
 export default function CategorySection() {
   const router = useRouter();
@@ -56,7 +27,7 @@ export default function CategorySection() {
         showsHorizontalScrollIndicator={false}
         className="flex-row"
       >
-        {CATEGORIES.map((cat) => {
+        {categories.map((cat) => {
           const [first, second] = cat.title.split(" ");
 
           return (
@@ -66,7 +37,7 @@ export default function CategorySection() {
               onPress={() =>
                 router.push({
                   pathname: "/(tabs)/categoryProducts",
-                  params: { category: cat.title },
+                  params: { category: cat.category ?? cat.title, title: cat.title },
                 })
               }
               className="w-[150px] h-[70px] rounded-2xl mr-3 flex-row overflow-hidden"

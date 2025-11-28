@@ -308,7 +308,9 @@ import {
   searchProductsApi,
   sortProductsApi,
   deleteProductsApi,
+  updateProductApi,
   type CreateProductPayload,
+  type UpdateProductPayload,
 } from "@/lib/api/products";
 import type { Product } from "@/lib/types/Product";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
@@ -325,6 +327,8 @@ interface ProductState {
   createError: string | null;
   deleting: boolean;
   deleteError: string | null;
+  updating: boolean;
+  updateError: string | null;
 }
 
 const initialState: ProductState = {
@@ -335,6 +339,8 @@ const initialState: ProductState = {
   createError: null,
   deleting: false,
   deleteError: null,
+  updating: false,
+  updateError: null,
 };
 
 const normalizeError = (error: unknown) => {
@@ -464,6 +470,26 @@ export const deleteProducts = createAsyncThunk<
   }
 });
 
+export const updateProduct = createAsyncThunk<
+  Product,
+  UpdateProductPayload,
+  { rejectValue: string; state: RootState }
+>("products/update", async (payload, { rejectWithValue, getState }) => {
+  const token = getState().auth.accessToken ?? undefined;
+
+  if (!token) {
+    return rejectWithValue("Please sign in to update products.");
+  }
+
+  try {
+    return await updateProductApi(payload, token);
+  } catch (error) {
+    const message =
+      normalizeError(error) ?? "Unable to update product right now.";
+    return rejectWithValue(message);
+  }
+});
+
 /* -----------------------------------------------------------
   SLICE
 ----------------------------------------------------------- */
@@ -572,6 +598,31 @@ const productSlice = createSlice({
           action.payload ??
           action.error.message ??
           "Failed to delete products.";
+      })
+      .addCase(updateProduct.pending, (state) => {
+        state.updating = true;
+        state.updateError = null;
+      })
+      .addCase(updateProduct.fulfilled, (state, action) => {
+        state.updating = false;
+        state.updateError = null;
+
+        const updated = action.payload;
+        const index = state.items.findIndex(
+          (item) => String(item.id) === String(updated.id)
+        );
+        if (index >= 0) {
+          state.items[index] = updated;
+        } else {
+          state.items = [updated, ...state.items];
+        }
+      })
+      .addCase(updateProduct.rejected, (state, action) => {
+        state.updating = false;
+        state.updateError =
+          action.payload ??
+          action.error.message ??
+          "Failed to update product.";
       });
   },
 });

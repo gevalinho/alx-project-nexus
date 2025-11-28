@@ -56,6 +56,19 @@ export type CreateProductPayload = {
   expiry_date?: string;
 };
 
+export type UpdateProductPayload = {
+  id: Product["id"];
+  name?: string;
+  price?: number;
+  description?: string;
+  category?: string;
+  stock?: number;
+  status?: string;
+  manufactured_date?: string;
+  expiry_date?: string;
+  product_image_file?: UploadableFile | null;
+};
+
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const ensureBaseUrl = () => {
@@ -343,6 +356,67 @@ export const createProductApi = async (
     (Array.isArray(data) ? (data[0] as BackendProduct) : (data as BackendProduct));
 
   return normalizeProduct(rawProduct ?? payload);
+};
+
+export const updateProductApi = async (
+  payload: UpdateProductPayload,
+  token?: string
+): Promise<Product> => {
+  ensureBaseUrl();
+
+  if (!token) {
+    throw new Error("Missing access token. Please sign in again.");
+  }
+
+  const { id, product_image_file, ...rest } = payload;
+  const normalizedId = encodeURIComponent(String(id));
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  const definedEntries = Object.entries(rest).filter(
+    ([, value]) => value !== undefined && value !== null
+  );
+
+  const hasFile = !!product_image_file?.uri;
+  if (!hasFile && !definedEntries.length) {
+    throw new Error("No changes to update.");
+  }
+
+  let body: BodyInit | undefined;
+
+  if (hasFile) {
+    const formData = new FormData();
+    for (const [key, value] of definedEntries) {
+      formData.append(key, String(value));
+    }
+
+    formData.append("product_image", {
+      uri: normalizeUploadUri(product_image_file!.uri),
+      name: product_image_file!.name,
+      type: product_image_file!.type || "image/jpeg",
+    } as any);
+
+    body = formData as any;
+  } else {
+    headers["Content-Type"] = "application/json";
+    body = JSON.stringify(Object.fromEntries(definedEntries));
+  }
+
+  const res = await withTimeout(
+    fetch(`${BASE_URL}/product/product_list/${normalizedId}/`, {
+      method: "PATCH",
+      headers,
+      body,
+    })
+  );
+
+  const data = await handleResponse(res);
+  const rawProduct =
+    (data?.data as BackendProduct) ??
+    (Array.isArray(data) ? (data[0] as BackendProduct) : (data as BackendProduct));
+
+  return normalizeProduct(rawProduct ?? { ...rest, id } as BackendProduct);
 };
 
 export const deleteProductsApi = async (

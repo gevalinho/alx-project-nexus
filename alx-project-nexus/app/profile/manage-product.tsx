@@ -19,6 +19,13 @@ const actions: ManageAction[] = [
     route: "/profile/create-product",
   },
   {
+    id: "edit",
+    label: "Edit Products",
+    description: "Update details, pricing, or photos for existing items.",
+    icon: "create-outline",
+    route: "/profile/edit-products",
+  },
+  {
     id: "delete",
     label: "Delete Products",
     description: "Remove listings that are no longer available.",

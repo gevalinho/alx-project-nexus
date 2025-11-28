@@ -1,7 +1,8 @@
 import { decreaseQty, increaseQty, removeItem } from "@/lib/store/cartSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { Ionicons } from "@expo/vector-icons";
-import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
+import { router } from "expo-router";
+import { Alert, FlatList, Image, Text, TouchableOpacity, View } from "react-native";
 
 export default function CartScreen() {
   const { items } = useAppSelector((s) => s.cart);
@@ -14,6 +15,15 @@ export default function CartScreen() {
 
   const discount = 7; // Static for now
   const finalPrice = (parseFloat(totalPrice) - discount).toFixed(2);
+
+   const handlePlaceOrder = () => {
+      if (!items.length) {
+        Alert.alert("Your cart is empty", "Add some items before checking out.");
+        return;
+      }
+  
+      router.push("/(tabs)/checkout");
+    };
 
   return (
     <View className="flex-1 bg-white">
@@ -126,7 +136,9 @@ export default function CartScreen() {
         </View>
 
         {/* CHECKOUT BUTTON */}
-        <TouchableOpacity className="mt-4 bg-[#FF9F00] py-4 rounded-xl items-center">
+        <TouchableOpacity 
+        onPress={handlePlaceOrder}
+        className="mt-4 bg-[#FF9F00] py-4 rounded-xl items-center">
           <Text className="text-white font-semibold text-base">
             Check Out
           </Text>

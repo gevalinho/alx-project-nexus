@@ -344,3 +344,45 @@ export const createProductApi = async (
 
   return normalizeProduct(rawProduct ?? payload);
 };
+
+export const deleteProductsApi = async (
+  ids: Array<Product["id"]>,
+  token?: string
+): Promise<Product["id"][]> => {
+  if (!ids.length) return [];
+  const normalizedIds = ids.map((id) => String(id));
+
+  if (!BASE_URL) {
+    console.warn(
+      "[products-api] deleteProductsApi fallback: missing base URL, simulating delete."
+    );
+    await delay(200);
+    return normalizedIds;
+  }
+
+  if (!token) {
+    throw new Error("Missing access token. Please sign in again.");
+  }
+
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  await Promise.all(
+    normalizedIds.map(async (id) => {
+      const res = await withTimeout(
+        fetch(`${BASE_URL}/product/product_list/${encodeURIComponent(id)}/`, {
+          method: "DELETE",
+          headers,
+        })
+      );
+
+      // Some APIs respond with 204 (no content), so ignore the response body.
+      if (res.status !== 204) {
+        await handleResponse(res);
+      }
+    })
+  );
+
+  return normalizedIds;
+};

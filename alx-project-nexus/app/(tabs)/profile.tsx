@@ -168,9 +168,9 @@ export default function ProfileScreen() {
           <Text className="text-gray-400 mb-2">Account</Text>
           <View className="bg-white rounded-lg">
             <MenuItem
-              label="Create Product"
-              icon="add-circle-outline"
-              onPress={() => router.push("/profile/create-product")}
+              label="Manage Products"
+              icon="cube-outline"
+              onPress={() => router.push("/profile/manage-product")}
             />
             <MenuItem
               label="Edit Profile"

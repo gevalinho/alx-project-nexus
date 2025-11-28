@@ -307,6 +307,7 @@ import {
   fetchProductsByCategoryApi,
   searchProductsApi,
   sortProductsApi,
+  deleteProductsApi,
   type CreateProductPayload,
 } from "@/lib/api/products";
 import type { Product } from "@/lib/types/Product";
@@ -322,6 +323,8 @@ interface ProductState {
   error: string | null;
   creating: boolean;
   createError: string | null;
+  deleting: boolean;
+  deleteError: string | null;
 }
 
 const initialState: ProductState = {
@@ -330,6 +333,8 @@ const initialState: ProductState = {
   error: null,
   creating: false,
   createError: null,
+  deleting: false,
+  deleteError: null,
 };
 
 const normalizeError = (error: unknown) => {
@@ -435,6 +440,30 @@ export const createProduct = createAsyncThunk<
   }
 });
 
+export const deleteProducts = createAsyncThunk<
+  Product["id"][],
+  Array<Product["id"]>,
+  { rejectValue: string; state: RootState }
+>("products/delete", async (ids, { rejectWithValue, getState }) => {
+  const token = getState().auth.accessToken ?? undefined;
+
+  if (!ids.length) {
+    return [];
+  }
+
+  if (!token) {
+    return rejectWithValue("Please sign in to delete products.");
+  }
+
+  try {
+    return await deleteProductsApi(ids, token);
+  } catch (error) {
+    const message =
+      normalizeError(error) ?? "Unable to delete products right now.";
+    return rejectWithValue(message);
+  }
+});
+
 /* -----------------------------------------------------------
   SLICE
 ----------------------------------------------------------- */
@@ -520,6 +549,29 @@ const productSlice = createSlice({
           action.payload ??
           action.error.message ??
           "Failed to create product.";
+      })
+      .addCase(deleteProducts.pending, (state) => {
+        state.deleting = true;
+        state.deleteError = null;
+      })
+      .addCase(deleteProducts.fulfilled, (state, action) => {
+        state.deleting = false;
+        state.deleteError = null;
+
+        if (!action.payload?.length) return;
+        const idsToRemove = new Set(
+          action.payload.map((id) => String(id))
+        );
+        state.items = state.items.filter(
+          (item) => !idsToRemove.has(String(item.id))
+        );
+      })
+      .addCase(deleteProducts.rejected, (state, action) => {
+        state.deleting = false;
+        state.deleteError =
+          action.payload ??
+          action.error.message ??
+          "Failed to delete products.";
       });
   },
 });

@@ -2,14 +2,13 @@ import { Feather, Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   Image,
   RefreshControl,
   ScrollView,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 import { fetchProfile, logout } from "@/lib/store/authSlice";
@@ -205,7 +204,7 @@ export default function ProfileScreen() {
             <MenuItem
               label="Privacy Policy"
               icon="shield-checkmark-outline"
-              onPress={() => router.push("/privacy")}
+              // onPress={() => router.push("/privacy")}
             />
             <MenuItem
               label="Log Out"

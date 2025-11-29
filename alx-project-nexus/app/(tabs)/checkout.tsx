@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type DeliveryOption = {
   id: string;
@@ -144,7 +145,7 @@ export default function CheckoutScreen() {
   };
 
   return (
-    <View className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-white">
       <View className="py-4 border-b border-gray-200 items-center">
         <Text className="text-lg font-semibold text-[#0D1A2E]">Checkout</Text>
       </View>
@@ -166,7 +167,11 @@ export default function CheckoutScreen() {
           </TouchableOpacity>
         </View>
       ) : (
-        <ScrollView className="flex-1 px-5 pt-6" showsVerticalScrollIndicator={false}>
+        <ScrollView
+          className="flex-1 px-5 pt-6"
+          contentContainerStyle={{ paddingBottom: 120 }}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Close */}
           <TouchableOpacity
             className="absolute right-0 -top-2 p-2"
@@ -310,7 +315,7 @@ export default function CheckoutScreen() {
           {/* Place order */}
           <TouchableOpacity
             onPress={handlePlaceOrder}
-            className="bg-[#FF8A00] py-4 rounded-2xl items-center mb-10 shadow-md"
+            className="bg-[#FF8A00] py-4 rounded-2xl items-center shadow-md mb-4"
           >
             <Text className="text-white font-semibold text-base">
               Place Order - {formatMoney(total)}
@@ -321,6 +326,6 @@ export default function CheckoutScreen() {
           </TouchableOpacity>
         </ScrollView>
       )}
-    </View>
+    </SafeAreaView>
   );
 }

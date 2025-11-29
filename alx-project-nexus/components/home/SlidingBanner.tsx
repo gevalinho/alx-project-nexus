@@ -25,9 +25,30 @@ export default function SlidingBanner() {
   const [currentBanner, setCurrentBanner] = useState(0);
 
   const banners = [
-    "https://picsum.photos/seed/promo1/800/500",
-    "https://picsum.photos/seed/promo2/800/500",
-    "https://picsum.photos/seed/promo3/800/500",
+    {
+      id: "sneakers",
+      title: "Sneaker Drop",
+      headline: "Up to 40% off",
+      subtext: "Limited edition runners",
+      image:
+        "https://images.unsplash.com/photo-1514986888952-8cd320577b68?auto=format&fit=crop&w=900&q=80",
+    },
+    {
+      id: "bags",
+      title: "Luxury Bags",
+      headline: "New arrivals",
+      subtext: "Handcrafted leather pieces",
+      image:
+        "https://images.unsplash.com/photo-1543294001-f7cd5d7fb516?auto=format&fit=crop&w=900&q=80",
+    },
+    {
+      id: "tech",
+      title: "Smart Gadgets",
+      headline: "Bundle & Save 25%",
+      subtext: "Wearables · Headphones · Speakers",
+      image:
+        "https://images.unsplash.com/photo-1523475472560-d2df97ec485c?auto=format&fit=crop&w=900&q=80",
+    },
   ];
 
   const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -42,7 +63,7 @@ export default function SlidingBanner() {
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        keyExtractor={(_, index) => index.toString()}
+        keyExtractor={(item) => item.id}
         onScroll={handleScroll}
         scrollEventThrottle={16}
         renderItem={({ item }) => (
@@ -53,11 +74,14 @@ export default function SlidingBanner() {
             {/* Left Content */}
             <View className="flex-1">
               <Text className="text-[18px] font-semibold px-5 text-[#0D1A2E]">
-                New Year Sale
+                {item.title}
               </Text>
 
               <Text className="text-[26px] font-bold text-[#0D1A2E] mt-1">
-                40% off
+                {item.headline}
+              </Text>
+              <Text className="text-[13px] text-gray-500 px-5 mt-1">
+                {item.subtext}
               </Text>
 
               {/* Countdown */}
@@ -75,7 +99,7 @@ export default function SlidingBanner() {
 
             {/* Right Image */}
             <Image
-              source={{ uri: item }}
+              source={{ uri: item.image }}
               className="w-[55%] h-full rounded-r-[25px]"
               resizeMode="cover"
             />
